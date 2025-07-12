@@ -1,0 +1,8 @@
+**/build/
+**/fp-info-cache/
+**/siteshift-backups/
+**/pico-sdk/
+**/.vscode/
+**/.DS_Store
+**/.idea/
+**/cmake-build-debug/
