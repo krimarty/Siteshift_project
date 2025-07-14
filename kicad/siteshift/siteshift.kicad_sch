@@ -10863,6 +10863,28 @@
 			)
 		)
 	)
+	(global_label "RV_SPEED_F"
+		(shape input)
+		(at 210.82 40.64 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "214a8eb9-3d35-4d07-8173-047f91229bb1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 225.2351 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "LED_SIGNAL"
 		(shape input)
 		(at 106.68 238.76 180)
@@ -11105,28 +11127,6 @@
 			)
 		)
 	)
-	(global_label "IPROP_F"
-		(shape input)
-		(at 210.82 40.64 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "6022dc57-162e-469f-bafd-a97c5f5c230d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 221.6067 40.64 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "PWM_SPEED"
 		(shape output)
 		(at 161.29 50.8 180)
@@ -11184,6 +11184,28 @@
 		(uuid "770cc982-8d6d-4fe3-997b-dfdba03f3774")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 69.8114 198.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "IPROP_F"
+		(shape input)
+		(at 210.82 48.26 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "7bad2ed0-3520-4008-89a3-0c74426c049e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 221.6067 48.26 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11409,28 +11431,6 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "RV_SPEED_F"
-		(shape input)
-		(at 210.82 48.26 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "b3124ef7-f3b6-4276-b3ec-e696fce3bad0")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 225.2351 48.26 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
 				(hide yes)
 			)
 		)
