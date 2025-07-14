@@ -19666,7 +19666,7 @@
 			)
 		)
 	)
-	(gr_text "Siteshift board\nv0.0.0"
+	(gr_text "Sideshift board\nv0.0.0"
 		(at 136.5 95 0)
 		(layer "F.SilkS")
 		(uuid "72cc5a9f-9ed4-4279-937c-ea5ffcbf7047")
