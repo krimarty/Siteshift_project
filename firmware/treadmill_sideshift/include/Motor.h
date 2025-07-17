@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 
 constexpr int NSLEEP  = 5;
 constexpr int DISABLE = 6;
@@ -16,14 +17,6 @@ private:
 
     void setPwmFreq(uint32_t freq = 25000) {
         analogWriteFreq(freq);
-    }
-
-    void enable() {
-        digitalWrite(_disable, LOW); 
-    }
-
-    void disable() {
-        digitalWrite(_disable, HIGH);
     }
 
     void dutyUpdate_worker() {

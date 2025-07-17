@@ -1,5 +1,4 @@
 #pragma once
-
 #include <Arduino.h>
 
 // Pin assignment
@@ -32,8 +31,8 @@ private:
     unsigned long _lastRightPress = 0;
     static constexpr unsigned long debounceDelay = 200; // debounce čas v ms
 
-    volatile bool _leftTriggered = false;
-    volatile bool _rightTriggered = false;
+    static volatile bool _leftTriggered;
+    static volatile bool _rightTriggered;
 
     float _filteredPot = 0;
     static constexpr float alpha = 0.1; // váha filtru (čím menší, tím pomalejší reakce)
@@ -41,6 +40,7 @@ private:
     
 public:
     UserInterface() {
+        pinMode(PIN_POT, INPUT);
         pinMode(PIN_BTN_LEFT, INPUT_PULLUP);
         pinMode(PIN_BTN_RIGHT, INPUT_PULLUP);
         pinMode(PIN_MODE, INPUT_PULLUP);
