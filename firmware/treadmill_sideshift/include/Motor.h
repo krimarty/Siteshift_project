@@ -1,31 +1,64 @@
 #pragma once
 
-constexpr int MOTOR_NSLEEP  = 5;
-constexpr int MOTOR_DISABLE = 6;
-constexpr int MOTOR_IN2     = 7;
-constexpr int MOTOR_IN1     = 8;
-constexpr int MOTOR_NFAULT  = 9;
+constexpr int NSLEEP  = 5;
+constexpr int DISABLE = 6;
+constexpr int PH     = 7;
+constexpr int EN     = 8;
+constexpr int NFAULT  = 9;
 
 class Motor {
 private:
-    int _nSleep, _disable, _in2, _in1, _nFault;
+    int _nSleep, _disable, _ph, _en, _nFault;
+    uint8_t _currentDuty = 0;
+    uint8_t _targetDuty = 0;
+    uint32_t _lastUpdate = 0;
+    uint16_t _rampDelay = 10;
 
+    void setPwmFreq(uint32_t freq = 25000) {
+        analogWriteFreq(freq);
+    }
+
+    void enable() {
+        digitalWrite(_disable, LOW); 
+    }
+
+    void disable() {
+        digitalWrite(_disable, HIGH);
+    }
+
+    void dutyUpdate_worker() {
+        if (_currentDuty == _targetDuty) return;
+        if (millis() - _lastUpdate >= _rampDelay) {
+            if (_currentDuty < _targetDuty) {
+                _currentDuty++;
+            } else {
+                _currentDuty--;
+            }
+            analogWrite(_en, _currentDuty);
+            _lastUpdate = millis();
+        }
+    }
 public:
     Motor()
-        : _nSleep(MOTOR_NSLEEP), _disable(MOTOR_DISABLE), _in2(MOTOR_IN2), _in1(MOTOR_IN1), _nFault(MOTOR_NFAULT) {}
+        : _nSleep(NSLEEP), _disable(DISABLE), _ph(PH), _en(EN), _nFault(NFAULT) {}
 
-    Motor(int nSleep, int disable, int in2, int in1, int nFault)
-        : _nSleep(nSleep), _disable(disable), _in2(in2), _in1(in1), _nFault(nFault) {}
+    Motor(int nSleep, int disable, int ph, int en, int nFault)
+        : _nSleep(nSleep), _disable(disable), _ph(ph), _en(en), _nFault(nFault) {}
 
     void begin() {
         pinMode(_nSleep, OUTPUT);
         pinMode(_disable, OUTPUT);
-        pinMode(_in2, OUTPUT);
-        pinMode(_in1, OUTPUT);
+        pinMode(_ph, OUTPUT);
+        pinMode(_en, OUTPUT);
+        setPwmFreq();
         pinMode(_nFault, INPUT_PULLUP);
         wake();
         enable();
         stop();
+    }
+
+    void dutyUpdate() {
+        dutyUpdate_worker();
     }
 
     void wake() {
@@ -37,29 +70,29 @@ public:
     }
 
     void enable() {
-        digitalWrite(_disable, LOW); // LOW = enabled for DRV8873H
+        digitalWrite(_disable, LOW); 
     }
 
     void disable() {
-        digitalWrite(_disable, HIGH); // HIGH = disabled for DRV8873H
+        digitalWrite(_disable, HIGH);
     }
 
-    void forward() {
-        digitalWrite(_in1, HIGH);
-        digitalWrite(_in2, LOW);
+    void left(uint8_t duty) {
+        digitalWrite(_ph, LOW);
+        _targetDuty = duty;
     }
 
-    void backward() {
-        digitalWrite(_in1, LOW);
-        digitalWrite(_in2, HIGH);
+    void right(uint8_t duty) {
+        digitalWrite(_ph, HIGH);
+        _targetDuty = duty;
     }
 
     void stop() {
-        digitalWrite(_in1, LOW);
-        digitalWrite(_in2, LOW);
+        _targetDuty = 0;
     }
 
     bool isFault() {
-        return digitalRead(_nFault) == LOW; // LOW = fault active
+        return digitalRead(_nFault) == LOW;
     }
+
 };

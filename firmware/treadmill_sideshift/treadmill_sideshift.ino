@@ -1,8 +1,7 @@
-#include "PinManager.h"
+#include "include/Motor.h"
 
 void setup()
 {
-    PinManager::setupPin(LED_BUILTIN, OUTPUT);
 }
 
 void loop()
