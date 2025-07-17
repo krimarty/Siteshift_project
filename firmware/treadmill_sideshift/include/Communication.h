@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#define MAX_MSG_LEN 32
 constexpr int MS_PIN = 4;
 
 // Change communication method here
@@ -10,6 +11,24 @@ constexpr int MS_PIN = 4;
 // #define USE_I2C
 
 class Communication {
+private:
+#ifdef USE_I2C
+    static String receiveMessageMsg;
+    static String sendMessageMsg;
+
+    static void onReceiveEvent(int numBytes) {
+        String msg = "";
+        while (Wire.available()) {
+            char c = Wire.read();
+            msg += c;
+        }
+        receiveMessageMsg = msg;
+    }
+    static void onRequestEvent() {
+        Wire.write(sendMessageMsg.c_str(), sendMessageMsg.length());
+    }
+    
+
 public:
     bool isMaster = false;
 
@@ -26,6 +45,8 @@ public:
             Wire.begin();
         } else {
             Wire.begin(i2c_addr);
+            Wire.onReceive(onReceiveEvent);
+            Wire.onRequest(onRequestEvent);
         }
 #endif
     }
@@ -35,10 +56,11 @@ public:
         Serial1.println(msg);
 #elif defined(USE_I2C)
         if (isMaster) {
-            // Pro I2C master: zadej cílovou adresu
-            // Wire.beginTransmission(addr); Wire.write(msg); Wire.endTransmission();
+            Wire.beginTransmission(0x10); Wire.write(msg); Wire.endTransmission();
         }
-        // Pro I2C slave: nelze posílat, pouze přijímat
+        else {
+            sendMessageMsg = msg;
+        }
 #endif
     }
 
@@ -48,7 +70,18 @@ public:
             return Serial1.readStringUntil('\n');
         }
 #elif defined(USE_I2C)
-        // Pro I2C slave použij Wire.onReceive v hlavním souboru
+        if (isMaster) {
+            Wire.requestFrom(0x10, MAX_MSG_LEN);
+            String msg = "";
+            while (Wire.available()) {
+                char c = Wire.read();
+                msg += c;
+            }
+            return msg;
+        }
+        else {
+            return receiveMessageMsg;
+        }
 #endif
         return "";
     }
