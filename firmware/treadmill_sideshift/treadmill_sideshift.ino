@@ -3,12 +3,44 @@
 #include "include/MotorFeedback.h"
 #include "include/I2CCommunication.h"
 #include "include/UARTCommunication.h"
+#include "include/Pid.h"
+#include "include/PositionCalculator.h"
+#include "include/OtherDevice.h"
 
+
+enum class State {
+    CALIB_LEFT,
+    CALIB_RIGHT,
+    SYN,
+    MANUAL,
+    RANDOM,
+    SEQUENCE
+};
+
+// Calibration parameters
+constexpr uint8_t calib_duty = 50; // Duty cycle for calibration
+constexpr int stableThreshold = 10; // jak dlouho musí být hodnota stejná
+constexpr int changeTolerance = 3; // tolerance pro změnu hodnoty
+int lastValue = 0;
+int stableCount = 0;
 
 ICommunication* comm;
 Motor motor;
 UserInterface ui;
+MotorFeedback feedback;
+Pid pid(1.0, 0.5, 0.1);
+PositionCalculator positionCalculator(0.0, 130.0);
+OtherDevice otherDevice;
 
+State currentState = State::CALIB_LEFT;
+
+State nextState(State state)
+{
+    if(ui.isSyncMode()) return State::SYN;
+    else if(ui.getModeType() == ModeType::MANUAL) return State::MANUAL;
+    else if(ui.getModeType() == ModeType::RANDOM) return State::RANDOM;
+    else return State::SEQUENCE;
+}
 
 void setup() {
     pinMode(MS_PIN, INPUT_PULLUP);
@@ -20,11 +52,74 @@ void setup() {
 
     comm->begin();
     motor.begin();
-    ui.setupInterrupts();
 }
 
 void loop() {
+    // Periodical class updates
     motor.dutyUpdate();
     ui.readFilteredPotPercent();
-    ui.processInputs();
+
+    // Second board communication
+    //Receive
+    if (comm->available()) {otherDevice.update(comm->receiveMessage());}
+    // Send
+    comm->sendMessage(otherDevice.send(0, 0, 0));
+
+
+    switch (currentState) {
+        case State::CALIB_LEFT:{
+        // Set position limits
+        motor.left(calib_duty);
+        int value = feedback.readRaw();
+
+        if (abs(value - lastValue) < changeTolerance) {
+            stableCount++;
+        } else {
+            stableCount = 0;
+        }
+        lastValue = value;
+
+        if (stableCount >= stableThreshold) {
+            positionCalculator.setAdcMinLimit(value);
+            currentState = State::CALIB_RIGHT;
+            stableCount = 0;
+        }
+        break;}
+
+        case State::CALIB_RIGHT:{
+        // Set position limits
+        motor.right(calib_duty);
+        int value = feedback.readRaw();
+
+        if (abs(value - lastValue) < changeTolerance) {
+            stableCount++;
+        } else {
+            stableCount = 0;
+        }
+        lastValue = value;
+
+        if (stableCount >= stableThreshold) {
+            positionCalculator.setAdcMaxLimit(value);
+            currentState = nextState(currentState);
+            stableCount = 0;
+        }
+        break;}
+
+        case State::SYN:
+        // Čekání na signál nebo synchronizaci
+        break;
+
+        case State::MANUAL:
+        // Režim ručního ovládání
+        break;
+
+        case State::RANDOM:
+        break;
+
+        case State::SEQUENCE:
+        break;
+    }
+
+
+
 }

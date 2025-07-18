@@ -61,10 +61,13 @@ public:
     }
 
     bool available() override {
-        return !_received.isEmpty();
+        if (_isMaster) {
+            return true;
+        } else {
+            return !_received.isEmpty();
+        }
     }
 };
 
-// Statické členy
 String I2CCommunication::_received = "";
 String I2CCommunication::_toSend = "";
