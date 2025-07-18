@@ -24,11 +24,14 @@ constexpr int changeTolerance = 3; // tolerance pro změnu hodnoty
 int lastValue = 0;
 int stableCount = 0;
 
+// Sequention mode variables
+bool goingLeft = true;
+
 ICommunication* comm;
 Motor motor;
 UserInterface ui;
 MotorFeedback feedback;
-Pid pid(1.0, 0.5, 0.1);
+Pid pidPos(10, 0, 0);
 PositionCalculator positionCalculator(0.0, 130.0);
 OtherDevice otherDevice;
 
@@ -105,18 +108,50 @@ void loop() {
         }
         break;}
 
-        case State::SYN:
-        // Čekání na signál nebo synchronizaci
+        case State::SYN:{
+        float error = otherDevice.getPistonPos() - positionCalculator.computePosition(feedback.readRaw());
+        float duty = pidPos.step(error, 0.0f);
+
+        duty = std::abs(duty);
+        if (duty > 100.0f) {
+            duty = 100.0f;
+        }
+
+        if (error < 0) {
+            motor.left(duty);
+        } else {
+            motor.right(duty);
+        }
         break;
+        }
 
         case State::MANUAL:
-        // Režim ručního ovládání
+        if (ui.getDirection() == Direction::LEFT) {
+            motor.left(ui.readFilteredPotPercent());
+        } else if (ui.getDirection() == Direction::RIGHT) {
+            motor.right(ui.readFilteredPotPercent());
+        } else {
+            motor.stop();
+        }
         break;
 
         case State::RANDOM:
         break;
 
         case State::SEQUENCE:
+        float duty = ui.readFilteredPotPercent();
+
+        if (goingLeft) {
+            motor.left(duty);
+            if (positionCalculator.minLimitReached(feedback.readRaw())) {
+                goingLeft = false;
+            }
+        } else {
+            motor.right(duty);
+            if (positionCalculator.maxLimitReached(feedback.readRaw())) {
+                goingLeft = true;
+            }
+        }
         break;
     }
 

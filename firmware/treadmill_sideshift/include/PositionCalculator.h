@@ -1,6 +1,8 @@
 #ifndef POSITION_CALCULATOR_H
 #define POSITION_CALCULATOR_H
 
+constexpr int tolerance = 10;
+
 class PositionCalculator {
 public:
     PositionCalculator(float minLength = 0.0, float maxLength = 130.0)
@@ -30,6 +32,14 @@ public:
 
         float normalized = (float)(adcValue - minAdc_) / (maxAdc_ - minAdc_);
         return minLength_ + normalized * (maxLength_ - minLength_);
+    }
+
+    bool minLimitReached(int adcValue) const {
+        return adcValue <= minAdc_ + tolerance;
+    }
+
+    bool maxLimitReached(int adcValue) const {
+        return adcValue >= maxAdc_ - tolerance;
     }
 
 private:
