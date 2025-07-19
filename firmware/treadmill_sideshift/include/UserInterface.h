@@ -59,6 +59,19 @@ public:
         }
     }
 
+    int getDirectionNum() {
+        if (isLeftPressed() && isRightPressed()) {
+            return 0;
+        }
+        else if (isLeftPressed()) {
+            return -1;
+        } else if (isRightPressed()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     bool isSyncMode()     { return digitalRead(PIN_MODE)    == LOW; }
     bool isInverse()      { return digitalRead(PIN_INVERSE) == LOW; }
 

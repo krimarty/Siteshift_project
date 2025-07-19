@@ -42,6 +42,14 @@ public:
         return adcValue >= maxAdc_ - tolerance;
     }
 
+    int minLimit() const {
+        return minAdc_;
+    }
+
+    int maxLimit() const {
+        return maxAdc_;
+    }
+
 private:
     int minAdc_;
     int maxAdc_; 
