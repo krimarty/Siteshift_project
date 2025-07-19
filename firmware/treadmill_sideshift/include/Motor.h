@@ -15,6 +15,8 @@ private:
     uint32_t _lastUpdate = 0;
     uint16_t _rampDelay = 10;
 
+    bool _isInverse = false;
+
     void setPwmFreq(uint32_t freq = 25000) {
         analogWriteFreq(freq);
     }
@@ -33,10 +35,10 @@ private:
     }
 public:
     Motor()
-        : _nSleep(NSLEEP), _disable(DISABLE), _ph(PH), _en(EN), _nFault(NFAULT) {}
+        : _nSleep(NSLEEP), _disable(DISABLE), _ph(PH), _en(EN), _nFault(NFAULT), _isInverse(false) {}
 
     Motor(int nSleep, int disable, int ph, int en, int nFault)
-        : _nSleep(nSleep), _disable(disable), _ph(ph), _en(en), _nFault(nFault) {}
+        : _nSleep(nSleep), _disable(disable), _ph(ph), _en(en), _nFault(nFault), _isInverse(false) {}
 
     void begin() {
         pinMode(_nSleep, OUTPUT);
@@ -71,12 +73,21 @@ public:
     }
 
     void left(uint8_t duty) {
-        digitalWrite(_ph, LOW);
+        if (_isInverse) {
+            digitalWrite(_ph, HIGH);
+        } else {
+            digitalWrite(_ph, LOW);
+        }
         _targetDuty = duty;
     }
 
     void right(uint8_t duty) {
-        digitalWrite(_ph, HIGH);
+        if (_isInverse) {
+            digitalWrite(_ph, LOW);
+        }
+        else {
+            digitalWrite(_ph, HIGH);
+        }
         _targetDuty = duty;
     }
 
@@ -86,6 +97,10 @@ public:
 
     bool isFault() {
         return digitalRead(_nFault) == LOW;
+    }
+
+    void setInverse(bool inverse) {
+        _isInverse = inverse;
     }
 
 };

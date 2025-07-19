@@ -85,6 +85,13 @@ void loop() {
         currentState == State::SYN;
     ui.setSignalLed(active);
 
+    if(ui.isInverse()) {
+        positionCalculator.setInverse(true);
+        motor.setInverse(true);
+    } else {
+        positionCalculator.setInverse(false);
+        motor.setInverse(false);
+    }
 
     switch (currentState) {
         case State::CALIB_LEFT:{
