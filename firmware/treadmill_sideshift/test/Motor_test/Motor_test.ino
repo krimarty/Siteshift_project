@@ -17,7 +17,7 @@ void setup() {
 void loop() {
   // === Forward ramp ===
   Serial.println("Turning RIGHT (ramping up)...");
-  motor.right(255);  // Max duty
+  motor.right(100);  // Max duty
   for (int i = 0; i < 260; i++) {
     motor.dutyUpdate();  // Gradually ramps up
     delay(10);
@@ -32,6 +32,7 @@ void loop() {
     motor.dutyUpdate();
     if (motor.isFault()) {
       Serial.println("FAULT detected!");
+      motor.resetFault();
     }
     if (analogRead(EN) == 0) break; // You can also check currentDuty if exposed
     delay(10);
@@ -41,7 +42,7 @@ void loop() {
 
   // === Reverse ramp ===
   Serial.println("Turning LEFT (ramping up)...");
-  motor.left(200);
+  motor.left(100);
   for (int i = 0; i < 210; i++) {
     motor.dutyUpdate();
     delay(10);

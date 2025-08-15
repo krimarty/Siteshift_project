@@ -10,8 +10,8 @@ constexpr int NFAULT  = 9;
 class Motor {
 private:
     int _nSleep, _disable, _ph, _en, _nFault;
-    uint8_t _currentDuty = 0;
-    uint8_t _targetDuty = 0;
+    int16_t _currentDuty = 0;
+    int16_t _targetDuty = 0;
     uint32_t _lastUpdate = 0;
     uint16_t _rampDelay = 10;
 
@@ -29,7 +29,12 @@ private:
             } else {
                 _currentDuty--;
             }
-            analogWrite(_en, _currentDuty);
+            if (_currentDuty < 0) {
+                digitalWrite(_ph, LOW);
+            } else if (_currentDuty > 0) {
+                digitalWrite(_ph, HIGH);
+            }
+            analogWrite(_en, map(abs(_currentDuty), 0, 100, 0, 255));
             _lastUpdate = millis();
         }
     }
@@ -46,7 +51,7 @@ public:
         pinMode(_ph, OUTPUT);
         pinMode(_en, OUTPUT);
         setPwmFreq();
-        pinMode(_nFault, INPUT_PULLUP);
+        pinMode(_nFault, INPUT);
         wake();
         enable();
         stop();
@@ -72,29 +77,39 @@ public:
         digitalWrite(_disable, HIGH);
     }
 
-    void left(uint8_t duty) {
+    void left(int16_t duty) {
+        if (duty > 100) {duty = 100;}
         if (_isInverse) {
-            digitalWrite(_ph, HIGH);
+            //digitalWrite(_ph, HIGH);
+            _targetDuty = duty;
         } else {
-            digitalWrite(_ph, LOW);
+            //digitalWrite(_ph, LOW);
+            _targetDuty = -duty;
         }
-        _targetDuty = duty;
     }
 
-    void right(uint8_t duty) {
+    void right(int16_t duty) {
+        if (duty > 100) {duty = 100;}
         if (_isInverse) {
-            digitalWrite(_ph, LOW);
+            //digitalWrite(_ph, LOW);
+            _targetDuty = -duty;
         }
         else {
-            digitalWrite(_ph, HIGH);
+            //digitalWrite(_ph, HIGH);
+            _targetDuty = duty;
         }
-        _targetDuty = duty;
     }
 
     void stop() {
         _targetDuty = 0;
     }
 
+    void resetFault() {
+        digitalWrite(_nSleep, LOW);
+        delayMicroseconds(12); 
+        digitalWrite(_nSleep, HIGH);
+
+    }
     bool isFault() {
         return digitalRead(_nFault) == LOW;
     }
