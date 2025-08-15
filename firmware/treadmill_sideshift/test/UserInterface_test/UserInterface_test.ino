@@ -27,6 +27,12 @@ void loop() {
   Serial.print(" | Mode: "); Serial.print(modeStr);
   Serial.print(" | Potentiometer: "); Serial.print(potPercent, 1); Serial.println(" %");
 
+  if (ui.isSyncMode()) {Serial.println("Syncmode active");}
+  else  {Serial.println("Syncmode off");}
+
+  if (ui.isInverse()) {Serial.println("Inversemode active");}
+  else  {Serial.println("Inversemode off");}
+
   // === LED test: cycle through all LED outputs every 1000ms ===
   if (millis() - lastLedTest >= 1000) {
     lastLedTest = millis();

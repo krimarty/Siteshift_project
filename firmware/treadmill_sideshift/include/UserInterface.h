@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 // Pin assignment
-constexpr int PIN_POT      = 26;
+constexpr int PIN_POT      = 28;
 constexpr int PIN_BTN_LEFT = 22;
 constexpr int PIN_BTN_RIGHT= 21;
 constexpr int PIN_MODE     = 20;
@@ -25,10 +25,7 @@ enum class Direction {
     STOP
 };
 class UserInterface {
-private:
-    float _filteredPot = 0;
-    static constexpr float alpha = 0.1; // váha filtru (čím menší, tím pomalejší reakce)
-    
+private:   
     bool isLeftPressed()  { return digitalRead(PIN_BTN_LEFT)  == LOW; }
     bool isRightPressed() { return digitalRead(PIN_BTN_RIGHT) == LOW; }
     
@@ -86,8 +83,7 @@ public:
 
     float readFilteredPotPercent() {
         int raw = analogRead(PIN_POT);
-        _filteredPot = alpha * raw + (1 - alpha) * _filteredPot;
-        return map(_filteredPot, 0, 4095, 20, 100);
+        return map(raw, 0, 1024, 20, 100);
     }
 
     void setSignalLed(bool state) { digitalWrite(PIN_LED_SIGNAL, state ? HIGH : LOW); }
