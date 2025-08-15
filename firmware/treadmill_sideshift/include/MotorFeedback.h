@@ -2,8 +2,8 @@
 #define MOTOR_FEEDBACK_H
 #include <Arduino.h>
 
-constexpr int PIN_MOTOR_FEEDBACK = 28;
-constexpr int SAMPLE_SIZE = 10;
+constexpr int PIN_MOTOR_FEEDBACK = 27;
+constexpr int SAMPLE_SIZE = 5;
 
 class MotorFeedback {
 private:
