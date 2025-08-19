@@ -15,8 +15,8 @@ void setup() {
 
     Serial.println(isMaster ? "Device is MASTER" : "Device is SLAVE");
 
-    comm = new UARTCommunication();
-    //comm = new I2CCommunication(isMaster);
+    //comm = new UARTCommunication();
+    comm = new I2CCommunication(isMaster);
     comm->begin();
     Serial.println("Communication initialized.");
 }

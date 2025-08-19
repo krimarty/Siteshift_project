@@ -17,16 +17,23 @@ enum class State {
     SEQUENCE
 };
 
+// Motor spec
+constexpr int  PISTON_LEN = 130; // [mm]
+
 // Calibration parameters
 constexpr long unsigned int  DELAY_MS = 10;
+constexpr int  COMM_MS = 50;
 constexpr uint8_t calib_duty = 75;
-constexpr int stableThreshold = 1/(DELAY_MS/1000.0f);
+constexpr int stableThreshold = 2/(DELAY_MS/1000.0f);
 constexpr int changeTolerance = 2;
 int lastValue = 0;
 int stableCount = 0;
 
-// Last time
+// Communication variables
 unsigned long lastMillis = 0;
+bool comm_status = false;
+unsigned long lastToggle = 0;
+bool ledState = false; 
 
 // Random mode variables
 static int targetPos = 0;
@@ -38,7 +45,7 @@ ICommunication* comm;
 Motor motor;
 UserInterface ui;
 MotorFeedback feedback;
-Pid pidPos(10, 0.1, 0);
+Pid pidPos(8.5, 0.01, 0);
 PositionCalculator positionCalculator(0.0, 130.0);
 OtherDevice otherDevice;
 
@@ -58,8 +65,8 @@ void setup() {
     bool isMaster = digitalRead(MS_PIN) == LOW;
 
     // Choose communication method based on the mode
-    //comm = new UARTCommunication();
-    comm = new I2CCommunication(isMaster);
+    comm = new UARTCommunication();
+    //comm = new I2CCommunication(isMaster);
 
     comm->begin();
     motor.begin();
@@ -76,11 +83,20 @@ void loop() {
     // Periodical class updates
     motor.dutyUpdate();
     ui.readFilteredPotPercent();
+
     // Second board communication
-    //Receive
-    if (comm->available()) {otherDevice.update(comm->receiveMessage());}
-    // Send
-    comm->sendMessage(otherDevice.send(positionCalculator.computePosition(feedback.readRaw()), ui.readFilteredPotPercent(), ui.getDirectionNum()));
+    static unsigned long lastTime_comm = 0;
+
+    if (millis() - lastTime_comm > COMM_MS && currentState == State::SYN) {
+        lastTime_comm = millis();
+        comm_status = comm->isConnected();
+        Serial.print("Comm status: ");
+        Serial.println(comm_status);
+        //Receive
+        if (comm->available()) {otherDevice.update(comm->receiveMessage());}
+        // Send
+        comm->sendMessage(otherDevice.send(positionCalculator.computePosition(feedback.readRaw()), ui.readFilteredPotPercent(), ui.getDirectionNum()));
+    }
 
     if (currentState != State::MANUAL)
     {
@@ -88,12 +104,28 @@ void loop() {
         ui.setRightLed(false);
     }
 
-    bool active =
-        currentState == State::SEQUENCE ||
-        currentState == State::RANDOM   ||
-        currentState == State::SYN;
-    ui.setSignalLed(active);
+    if (currentState == State::SEQUENCE || currentState == State::RANDOM)
+        ui.setSignalLed(true);
+    else if (currentState == State::SYN)
+    {
+        if (comm_status)
+            ui.setSignalLed(true);
+        else
+        {
+            if (currentMillis - lastToggle >= 500)
+            {
+                ledState = !ledState;
+                ui.setSignalLed(ledState ? HIGH : LOW);
+                lastToggle = currentMillis;
+            }
+        }
 
+    }
+    else
+        ui.setSignalLed(false);
+
+
+    if (currentState != State::CALIB_LEFT && currentState != State::CALIB_RIGHT)
     if(ui.isInverse()) {
         positionCalculator.setInverse(true);
         motor.setInverse(true);
@@ -127,6 +159,7 @@ void loop() {
             // Set position limits
             motor.right(calib_duty);
             int value = feedback.readRaw();
+            Serial.println(value);
 
             if (abs(value - lastValue) < changeTolerance) {
                 stableCount++;
@@ -144,32 +177,39 @@ void loop() {
         }
 
         case State::SYN:{
-            Serial.println("SYN");
-            float error = otherDevice.getPistonPos() - positionCalculator.computePosition(feedback.readRaw());
-            float duty = pidPos.step(error, 0.0f);
-
-            duty = std::abs(duty);
-            if (duty > 100.0f) {
-                duty = 100.0f;
+            float error = positionCalculator.computePosition(feedback.readRaw()) - otherDevice.getPistonPos();
+            if (std::abs(error) < 1)
+            {
+                motor.stop();
             }
-
-            if (error < 0) {
-                motor.left(duty);
-            } else {
-                motor.right(duty);
+            else
+            {
+                float duty = pidPos.step(error, deltaMillis/1000.0f); 
+                duty = std::abs(duty);
+                if (duty > 100) duty = 100;
+                else if (duty < 20) duty = 20;
+                if (error < 0) {
+                    motor.left(duty);
+                } else {
+                    motor.right(duty);
+                }
             }
             currentState = nextState(currentState);
             break;
         }
 
-        case State::MANUAL:
-            Serial.println("MAN");
+        case State::MANUAL:{
+            float duty = ui.readFilteredPotPercent();
             if (ui.getDirection() == Direction::LEFT) {
-                motor.left(ui.readFilteredPotPercent());
+                if (positionCalculator.computePosition(feedback.readRaw()) > PISTON_LEN - 10)
+                    duty = 20;
+                motor.left(duty);
                 ui.setLeftLed(true);
                 ui.setRightLed(false);
             } else if (ui.getDirection() == Direction::RIGHT) {
-                motor.right(ui.readFilteredPotPercent());
+                if (positionCalculator.computePosition(feedback.readRaw()) < 10)
+                    duty = 20;
+                motor.right(duty);
                 ui.setRightLed(true);
                 ui.setLeftLed(false);
             } else {
@@ -179,28 +219,18 @@ void loop() {
             }
             currentState = nextState(currentState);
             break;
+        }
 
         case State::RANDOM:{
-            Serial.println("RANDOM");
             int currentPos = positionCalculator.computePosition(feedback.readRaw());
 
             if (targetPos == currentPos)
             {
-                targetPos = random(0, 130);
+                targetPos = random(5, 125);
             }
             
-
             float error =  currentPos - targetPos;
-
-            Serial.print("targetPos: ");
-            Serial.println(targetPos);
-            Serial.print("currentPos: ");
-            Serial.println(currentPos);
-
-
             float duty = pidPos.step(error, deltaMillis/1000.0f);
-            Serial.print("duty: ");
-            Serial.println(duty);
             duty = std::abs(duty);
             if (duty > ui.readFilteredPotPercent()) duty = ui.readFilteredPotPercent();
             else if (duty < 20) duty = 20;
@@ -215,17 +245,20 @@ void loop() {
         }
 
         case State::SEQUENCE:
-          Serial.println("SEQUENCE");
           float duty = ui.readFilteredPotPercent();
 
           if (goingLeft) {
+              if (positionCalculator.computePosition(feedback.readRaw()) > PISTON_LEN - 10)
+                  duty = 20;
               motor.left(duty);
-              if (positionCalculator.minLimitReached(feedback.readRaw())) {
+              if (positionCalculator.maxLimitReached(feedback.readRaw())) {
                   goingLeft = false;
               }
           } else {
+              if (positionCalculator.computePosition(feedback.readRaw()) < 10)
+                  duty = 20;
               motor.right(duty);
-              if (positionCalculator.maxLimitReached(feedback.readRaw())) {
+              if (positionCalculator.minLimitReached(feedback.readRaw())) {
                   goingLeft = true;
               }
           }

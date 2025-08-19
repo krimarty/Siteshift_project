@@ -42,21 +42,23 @@ public:
     }
 
     float computePosition(int adcValue) const {
-        if (isInverse_) {
-            adcValue = map(adcValue, 0, 4095, 4095, 0);
-        }
         if (adcValue < minAdc_) adcValue = minAdc_;
         if (adcValue > maxAdc_) adcValue = maxAdc_;
 
         float normalized = (float)(adcValue - minAdc_) / (maxAdc_ - minAdc_);
-        return minLength_ + normalized * (maxLength_ - minLength_);
+        float position = minLength_ + normalized * (maxLength_ - minLength_);
+        
+        if (isInverse_) {
+            position = map(position, 0, 130, 130, 0);
+        }
+        return position;
     }
 
     bool minLimitReached(int adcValue) const {
         if(isInverse_){
             return adcValue >= maxAdc_ - tolerance;
         }
-        return adcValue <= minAdc_ + tolerance;
+        return adcValue <= minAdc_ + tolerance;  
     }
 
     bool maxLimitReached(int adcValue) const {

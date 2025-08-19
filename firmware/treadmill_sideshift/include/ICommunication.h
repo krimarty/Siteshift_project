@@ -11,4 +11,6 @@ public:
     virtual void sendMessage(const String& msg) = 0;
     virtual String receiveMessage() = 0;
     virtual bool available() = 0;
+    virtual bool isConnected(unsigned long timeout = 200) = 0;
+
 };

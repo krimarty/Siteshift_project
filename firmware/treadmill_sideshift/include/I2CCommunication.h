@@ -13,6 +13,7 @@ private:
     static String _toSend;
     uint8_t _address;
     bool _isMaster;
+    unsigned long lastMsg_;
 
     static void onReceive(int numBytes) {
         _received = "";
@@ -72,6 +73,23 @@ public:
             return !_received.isEmpty();
         }
     }
+
+    bool isConnected(unsigned long timeout = 200) override {
+        if (!_isMaster) {
+            if (!_received.isEmpty()) {
+                lastMsg_ = millis();
+            }
+            return (millis() - lastMsg_ < timeout);
+        } else {
+            Wire.requestFrom(_address, (uint8_t)1);
+            if (Wire.available() > 0) {
+                lastMsg_ = millis();
+                return true;
+            }
+            return (millis() - lastMsg_ < timeout);
+        }
+    }
+
 };
 
 String I2CCommunication::_received = "";

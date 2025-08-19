@@ -3,6 +3,8 @@
 
 class UARTCommunication : public ICommunication {
 public:
+    unsigned long lastMsg_;
+
     void begin(unsigned long baudrate = 115200) override {
         Serial1.begin(baudrate);
     }
@@ -20,5 +22,12 @@ public:
 
     bool available() override {
         return Serial1.available() > 0;
+    }
+
+    bool isConnected(unsigned long timeout = 200) override {
+        if (Serial1.available()) {
+            lastMsg_ = millis();
+        }
+        return (millis() - lastMsg_ < timeout);
     }
 };
