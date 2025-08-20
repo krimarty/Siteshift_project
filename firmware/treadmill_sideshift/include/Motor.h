@@ -1,3 +1,18 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      Motor.h
+ * Author:    Martin Kriz
+ * Company:   Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the Motor class, which provides an interface
+ *   to control a motor using the DRV8873H driver. 
+ *   Designed for Raspberry Pi Pico 2 and the Sideshift Board v0.0.0.
+ *
+ * Notes:
+ * ============================================================= */
+
 #pragma once
 #include <Arduino.h>
 
@@ -80,10 +95,8 @@ public:
     void left(int16_t duty) {
         if (duty > 100) {duty = 100;}
         if (_isInverse) {
-            //digitalWrite(_ph, HIGH);
             _targetDuty = duty;
         } else {
-            //digitalWrite(_ph, LOW);
             _targetDuty = -duty;
         }
     }
@@ -91,11 +104,9 @@ public:
     void right(int16_t duty) {
         if (duty > 100) {duty = 100;}
         if (_isInverse) {
-            //digitalWrite(_ph, LOW);
             _targetDuty = -duty;
         }
         else {
-            //digitalWrite(_ph, HIGH);
             _targetDuty = duty;
         }
     }

@@ -1,3 +1,19 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      I2CCommunication.h
+ * Author:    Martin Kriz
+ * Client:    Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the I2CCommunication class, which implements
+ *   the ICommunication interface. All communication rules are defined
+ *   by ICommunication. This class provides master/slave communication
+ *   over I2C on Raspberry Pi Pico 2 and is designed for the Sideshift Board v0.0.0.
+ *
+ * Notes:
+ * ============================================================= */
+
 #pragma once
 #include "ICommunication.h"
 #include <Wire.h>

@@ -1,3 +1,19 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      MotorFeedback.h
+ * Author:    Martin Kriz
+ * Company:   Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the MotorFeedback class, which reads
+ *   analog feedback from a motor (voltage 0-10V)
+ *   and provides a smoothed output using a moving average.
+ *   Designed for Raspberry Pi Pico 2 and the Sideshift Board v0.0.0.
+ *
+ * Notes:
+ * ============================================================= */
+
 #ifndef MOTOR_FEEDBACK_H
 #define MOTOR_FEEDBACK_H
 #include <Arduino.h>

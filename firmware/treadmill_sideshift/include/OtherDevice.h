@@ -1,3 +1,19 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      OtherDevice.h
+ * Author:    Martin Kriz
+ * Company:   Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the OtherDevice class, which implements
+ *   a simple communication protocol for sending and receiving
+ *   piston-related messages. It parses messages of the form
+ *   "<pistonPos,potVal,dir;" and stores the last received state.
+ *
+ * Notes:
+ * ============================================================= */
+
 #pragma once
 
 #include <Arduino.h>

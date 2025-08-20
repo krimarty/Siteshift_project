@@ -1,3 +1,18 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      Pid.h
+ * Author:    Martin Kriz
+ * Company:   Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the Pid class, a classical PID controller
+ *   with integral windup protection. It calculates control output
+ *   based on proportional, integral, and derivative terms.
+ *
+ * Notes:
+ * ============================================================= */
+
 #ifndef PID_H
 #define PID_H
 

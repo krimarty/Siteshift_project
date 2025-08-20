@@ -1,3 +1,19 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      UserInterface.h
+ * Author:    Martin Kriz
+ * Company:   Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the UserInterface class, which handles
+ *   buttons, potentiometer, and LED indicators for the treadmill
+ *   sideshift project. Provides direction reading, mode selection,
+ *   inverse switch, LED control and potentiometer reading.
+ *
+ * Notes:
+ * ============================================================= */
+
 #pragma once
 #include <Arduino.h>
 

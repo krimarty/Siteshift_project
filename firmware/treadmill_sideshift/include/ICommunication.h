@@ -1,3 +1,20 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      ICommunication.h
+ * Author:    Martin Kriz
+ * Company:   Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the ICommunication interface, which sets
+ *   the standard rules for communication classes in the treadmill_sideshift
+ *   project. All concrete communication implementations (UART, I2C)
+ *   must follow this interface.
+ *
+ * Notes:
+ *   - All communication classes must implement these methods consistently.
+ * ============================================================= */
+
 #pragma once
 #include <Arduino.h>
 

@@ -1,3 +1,19 @@
+/* =============================================================
+ * Project:   treadmill_sideshift
+ * File:      PositionCalculator.h
+ * Author:    Martin Kriz
+ * Company:   Ullmanna s.r.o.
+ * Created:   2025-08-20
+ * -------------------------------------------------------------
+ * Description:
+ *   This header defines the PositionCalculator class, which converts
+ *   raw ADC readings from a motor piston sensor into a physical 
+ *   position (length) of the piston rod. Supports limits, inversion,
+ *   and tolerance checks.
+ *
+ * Notes:
+ * ============================================================= */
+
 #ifndef POSITION_CALCULATOR_H
 #define POSITION_CALCULATOR_H
 
