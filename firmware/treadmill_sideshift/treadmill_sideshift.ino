@@ -121,11 +121,10 @@ void loop() {
 
     // Second board communication
     static unsigned long lastTime_comm = 0;
-    if (millis() - lastTime_comm > COMM_MS && currentState == State::SYN) {
+    if (millis() - lastTime_comm > COMM_MS) {
         lastTime_comm = millis();
-        comm_status = comm->isConnected();
-        Serial.print("Comm status: ");
-        Serial.println(comm_status);
+        if (currentState == State::SYN)
+            comm_status = comm->isConnected();
         //Receive
         if (comm->available()) {otherDevice.update(comm->receiveMessage());}
         // Send
